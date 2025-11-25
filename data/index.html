@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>⟨ TRANSITION ANALYSIS ⟩</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    background: #0a0015;
+    background-image:
+      radial-gradient(ellipse at top, #1a0033 0%, transparent 60%),
+      radial-gradient(ellipse at bottom, #330066 0%, transparent 60%);
+    min-height: 100vh;
+    color: #e0d4ff;
+    padding: 15px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,0,255,0.03) 0px, transparent 2px, transparent 4px),
+      repeating-linear-gradient(90deg, rgba(0,255,255,0.03) 0px, transparent 2px, transparent 4px);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px 20px;
+    background: linear-gradient(135deg, rgba(138,43,226,0.1) 0%, rgba(75,0,130,0.1) 100%);
+    border: 2px solid #ff00ff;
+    border-radius: 0;
+    box-shadow:
+      0 0 20px rgba(255,0,255,0.3),
+      inset 0 0 20px rgba(138,43,226,0.1);
+    position: relative;
+  }
+
+  .header::before,
+  .header::after {
+    content: '◢◣◢◣◢◣';
+    position: absolute;
+    font-size: 10px;
+    color: #00ffff;
+    letter-spacing: 3px;
+  }
+
+  .header::before {
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .header::after {
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(180deg);
+  }
+
+  .header h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2em;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient 3s ease infinite;
+    text-shadow: 0 0 30px rgba(255,0,255,0.5);
+    margin: 0;
+  }
+
+  @keyframes gradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .header p {
+    color: #00ffff;
+    font-size: 12px;
+    letter-spacing: 2px;
+    margin-top: 8px;
+    text-transform: uppercase;
+  }
+
+  .name-section {
+    background: rgba(10,0,30,0.8);
+    border: 1px solid #8b00ff;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 0 15px rgba(138,43,226,0.3);
+  }
+
+  .name-section label {
+    font-family: 'Orbitron', sans-serif;
+    color: #ff00ff;
+    font-size: 1.1em;
+    display: block;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+  }
+
+  .name-section input {
+    width: 100%;
+    padding: 12px;
+    background: rgba(0,0,0,0.5);
+    border: 2px solid #8b00ff;
+    color: #e0d4ff;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1em;
+    transition: all 0.3s;
+  }
+
+  .name-section input:focus {
+    outline: none;
+    border-color: #00ffff;
+    box-shadow: 0 0 15px rgba(0,255,255,0.4);
+  }
+
+  .instructions {
+    background: rgba(10,0,30,0.8);
+    border: 1px solid #8b00ff;
+    border-left: 4px solid #ff00ff;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 0 15px rgba(138,43,226,0.3);
+    font-size: 0.95em;
+    line-height: 1.6;
+  }
+
+  .instructions h2 {
+    font-family: 'Orbitron', sans-serif;
+    color: #ff00ff;
+    font-size: 1.2em;
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .instructions ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .instructions li {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(138,43,226,0.2);
+    color: #d0c0ff;
+  }
+
+  .instructions li::before {
+    content: '▸ ';
+    color: #00ffff;
+    font-weight: bold;
+  }
+
+  .progress-bar {
+    background: rgba(10,0,30,0.8);
+    height: 35px;
+    border: 2px solid #8b00ff;
+    margin: 20px 0;
+    position: sticky;
+    top: 15px;
+    z-index: 100;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(138,43,226,0.4);
+  }
+
+  .progress-fill {
+    background: linear-gradient(90deg, #8b00ff 0%, #ff00ff 50%, #00ffff 100%);
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    color: #000;
+    font-size: 0.9em;
+    text-shadow: 0 0 10px rgba(255,255,255,0.8);
+    letter-spacing: 1px;
+  }
+
+  .track-item {
+    background: linear-gradient(135deg, rgba(20,0,40,0.9) 0%, rgba(40,0,60,0.9) 100%);
+    border: 2px solid #8b00ff;
+    padding: 0;
+    margin-bottom: 20px;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(138,43,226,0.2);
+    overflow: hidden;
+  }
+
+  .track-item::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #ff00ff, #00ffff);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+  }
+
+  .track-item:hover::before {
+    opacity: 0.3;
+  }
+
+  .track-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(255,0,255,0.5);
+  }
+
+  .track-item.completed {
+    border-color: #00ffff;
+    box-shadow: 0 0 20px rgba(0,255,255,0.6);
+  }
+
+  .track-progress-bar {
+    background: rgba(0,0,0,0.5);
+    height: 8px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .track-progress-fill {
+    background: linear-gradient(90deg, #8b00ff 0%, #ff00ff 50%, #00ffff 100%);
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s;
+  }
+
+  .track-content {
+    padding: 20px;
+  }
+
+  .track-item h3 {
+    font-family: 'Orbitron', sans-serif;
+    color: #00ffff;
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .track-item h3::before {
+    content: '◈';
+    color: #00ffff;
+    font-size: 1.1em;
+  }
+
+  audio {
+    width: 100%;
+    margin: 12px 0;
+    filter: hue-rotate(270deg) saturate(1.5);
+  }
+
+  .rating-label {
+    display: block;
+    font-family: 'Orbitron', sans-serif;
+    color: #00ffff;
+    margin: 15px 0 12px 0;
+    font-size: 1em;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .rating {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+
+  .rating-option {
+    position: relative;
+  }
+
+  .rating input[type="radio"] {
+    display: none;
+  }
+
+  .rating label {
+    display: block;
+    cursor: pointer;
+    padding: 15px 8px;
+    border: 2px solid #8b00ff;
+    text-align: center;
+    transition: all 0.2s ease;
+    font-weight: 700;
+    background: rgba(10,0,30,0.8);
+    color: #d0c0ff;
+    position: relative;
+    overflow: hidden;
+    font-size: 0.8em;
+    line-height: 1.3;
+  }
+
+  .rating label::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,0,255,0.3), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .rating label:hover::before {
+    left: 100%;
+  }
+
+  .rating label:hover {
+    border-color: #ff00ff;
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(255,0,255,0.4);
+  }
+
+  .rating input[type="radio"]:checked + label {
+    background: linear-gradient(135deg, #8b00ff 0%, #ff00ff 100%);
+    border-color: #00ffff;
+    color: #fff;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255,0,255,0.8);
+    font-weight: 900;
+  }
+
+  .submit-btn {
+    background: linear-gradient(135deg, #8b00ff 0%, #ff00ff 100%);
+    color: #fff;
+    padding: 16px;
+    border: 2px solid #00ffff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1em;
+    font-weight: 900;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 25px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(138,43,226,0.5);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .submit-btn:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  .submit-btn:hover {
+    box-shadow: 0 0 30px rgba(255,0,255,0.8);
+    transform: translateY(-2px);
+  }
+
+  .submit-btn:disabled {
+    background: rgba(50,50,50,0.8);
+    border-color: #555;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    color: #00ffff;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .loading.active {
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    body {
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    .header {
+      padding: 20px 15px;
+    }
+
+    .header h1 {
+      font-size: 1.5em;
+      letter-spacing: 2px;
+    }
+
+    .header p {
+      font-size: 10px;
+    }
+
+    .track-content {
+      padding: 15px;
+    }
+
+    .track-item h3 {
+      font-size: 1.1em;
+    }
+
+    .rating {
+      gap: 6px;
+    }
+
+    .rating label {
+      padding: 12px 4px;
+      font-size: 0.7em;
+    }
+
+    .progress-bar {
+      height: 30px;
+    }
+
+    .progress-fill {
+      font-size: 0.8em;
+    }
+
+    .submit-btn {
+      font-size: 1em;
+      padding: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .header h1 {
+      font-size: 1.3em;
+    }
+
+    .rating label {
+      padding: 10px 2px;
+      font-size: 0.65em;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⟨ TRANSITION ⟩<br>ANALYSIS</h1>
+      <p>◆ NEURAL AUDIO EVALUATION ◆</p>
+    </div>
+
+    <div class="name-section">
+      <label for="participantName">PARTICIPANT ID (optional):</label>
+      <input type="text" id="participantName" placeholder="Enter your name...">
+    </div>
+
+    <div class="instructions">
+      <h2>⟨ PROTOCOL ⟩</h2>
+      <ul>
+        <li><strong>LISTEN:</strong> Play each audio clip</li>
+        <li><strong>RATE:</strong> 1 (Very Rough) → 5 (Very Smooth)</li>
+        <li><strong>TIP:</strong> Use headphones for best results</li>
+        <li><strong>COMPLETE:</strong> Rate all clips before submitting</li>
+        <li><strong>CAUTION:</strong> All transitions were made by a machine so please do not be harsh. When evaluating transitions try not to rate a transition by itself. Instead, think about how good or smooth it is compared to the rest</li>
+      </ul>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressBar">0 / 15</div>
+    </div>
+
+    <form id="ratingForm">
+
+      <div class="track-item" id="track1Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress1"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 01</h3>
+          <audio controls preload="metadata">
+            <source src="Track_01 (1).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track1_1" name="track1" value="1" required>
+              <label for="track1_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track1_2" name="track1" value="2">
+              <label for="track1_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track1_3" name="track1" value="3">
+              <label for="track1_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track1_4" name="track1" value="4">
+              <label for="track1_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track1_5" name="track1" value="5">
+              <label for="track1_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track2Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress2"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 02</h3>
+          <audio controls preload="metadata">
+            <source src="Track_02 (1).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track2_1" name="track2" value="1" required>
+              <label for="track2_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track2_2" name="track2" value="2">
+              <label for="track2_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track2_3" name="track2" value="3">
+              <label for="track2_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track2_4" name="track2" value="4">
+              <label for="track2_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track2_5" name="track2" value="5">
+              <label for="track2_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track3Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress3"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 03</h3>
+          <audio controls preload="metadata">
+            <source src="Track_03 (1).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track3_1" name="track3" value="1" required>
+              <label for="track3_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track3_2" name="track3" value="2">
+              <label for="track3_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track3_3" name="track3" value="3">
+              <label for="track3_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track3_4" name="track3" value="4">
+              <label for="track3_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track3_5" name="track3" value="5">
+              <label for="track3_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track4Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress4"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 04</h3>
+          <audio controls preload="metadata">
+            <source src="Track_04 (1).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track4_1" name="track4" value="1" required>
+              <label for="track4_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track4_2" name="track4" value="2">
+              <label for="track4_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track4_3" name="track4" value="3">
+              <label for="track4_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track4_4" name="track4" value="4">
+              <label for="track4_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track4_5" name="track4" value="5">
+              <label for="track4_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track5Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress5"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 05</h3>
+          <audio controls preload="metadata">
+            <source src="Track_05 (1).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track5_1" name="track5" value="1" required>
+              <label for="track5_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track5_2" name="track5" value="2">
+              <label for="track5_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track5_3" name="track5" value="3">
+              <label for="track5_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track5_4" name="track5" value="4">
+              <label for="track5_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track5_5" name="track5" value="5">
+              <label for="track5_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track6Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress6"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 06</h3>
+          <audio controls preload="metadata">
+            <source src="Track_06 (3).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track6_1" name="track6" value="1" required>
+              <label for="track6_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track6_2" name="track6" value="2">
+              <label for="track6_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track6_3" name="track6" value="3">
+              <label for="track6_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track6_4" name="track6" value="4">
+              <label for="track6_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track6_5" name="track6" value="5">
+              <label for="track6_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track7Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress7"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 07</h3>
+          <audio controls preload="metadata">
+            <source src="Track_07 (1).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track7_1" name="track7" value="1" required>
+              <label for="track7_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track7_2" name="track7" value="2">
+              <label for="track7_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track7_3" name="track7" value="3">
+              <label for="track7_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track7_4" name="track7" value="4">
+              <label for="track7_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track7_5" name="track7" value="5">
+              <label for="track7_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track8Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress8"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 08</h3>
+          <audio controls preload="metadata">
+            <source src="Track_08 (4).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track8_1" name="track8" value="1" required>
+              <label for="track8_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track8_2" name="track8" value="2">
+              <label for="track8_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track8_3" name="track8" value="3">
+              <label for="track8_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track8_4" name="track8" value="4">
+              <label for="track8_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track8_5" name="track8" value="5">
+              <label for="track8_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track9Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress9"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 09</h3>
+          <audio controls preload="metadata">
+            <source src="Track_09 (2).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track9_1" name="track9" value="1" required>
+              <label for="track9_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track9_2" name="track9" value="2">
+              <label for="track9_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track9_3" name="track9" value="3">
+              <label for="track9_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track9_4" name="track9" value="4">
+              <label for="track9_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track9_5" name="track9" value="5">
+              <label for="track9_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track10Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress10"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 10</h3>
+          <audio controls preload="metadata">
+            <source src="Track_10 (1).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track10_1" name="track10" value="1" required>
+              <label for="track10_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track10_2" name="track10" value="2">
+              <label for="track10_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track10_3" name="track10" value="3">
+              <label for="track10_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track10_4" name="track10" value="4">
+              <label for="track10_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track10_5" name="track10" value="5">
+              <label for="track10_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track11Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress11"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 11</h3>
+          <audio controls preload="metadata">
+            <source src="Track_11 (1).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track11_1" name="track11" value="1" required>
+              <label for="track11_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track11_2" name="track11" value="2">
+              <label for="track11_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track11_3" name="track11" value="3">
+              <label for="track11_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track11_4" name="track11" value="4">
+              <label for="track11_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track11_5" name="track11" value="5">
+              <label for="track11_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track12Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress12"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 12</h3>
+          <audio controls preload="metadata">
+            <source src="Track_12 (1).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track12_1" name="track12" value="1" required>
+              <label for="track12_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track12_2" name="track12" value="2">
+              <label for="track12_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track12_3" name="track12" value="3">
+              <label for="track12_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track12_4" name="track12" value="4">
+              <label for="track12_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track12_5" name="track12" value="5">
+              <label for="track12_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track13Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress13"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 13</h3>
+          <audio controls preload="metadata">
+            <source src="Track_13 (3).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track13_1" name="track13" value="1" required>
+              <label for="track13_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track13_2" name="track13" value="2">
+              <label for="track13_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track13_3" name="track13" value="3">
+              <label for="track13_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track13_4" name="track13" value="4">
+              <label for="track13_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track13_5" name="track13" value="5">
+              <label for="track13_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track14Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress14"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 14</h3>
+          <audio controls preload="metadata">
+            <source src="Track_14 (2).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track14_1" name="track14" value="1" required>
+              <label for="track14_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track14_2" name="track14" value="2">
+              <label for="track14_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track14_3" name="track14" value="3">
+              <label for="track14_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track14_4" name="track14" value="4">
+              <label for="track14_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track14_5" name="track14" value="5">
+              <label for="track14_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="track-item" id="track15Item">
+        <div class="track-progress-bar">
+          <div class="track-progress-fill" id="trackProgress15"></div>
+        </div>
+        <div class="track-content">
+          <h3>SEQUENCE 15</h3>
+          <audio controls preload="metadata">
+            <source src="Track_15 (3).mp3" type="audio/mpeg">
+          </audio>
+          <span class="rating-label">⟨ RATE TRANSITION QUALITY ⟩</span>
+          <div class="rating">
+            <div class="rating-option">
+              <input type="radio" id="track15_1" name="track15" value="1" required>
+              <label for="track15_1">◢<br>1<br>VERY<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track15_2" name="track15" value="2">
+              <label for="track15_2">◢◣<br>2<br>SOME-WHAT<br>ROUGH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track15_3" name="track15" value="3">
+              <label for="track15_3">◢◣◢<br>3<br>ACCEPT-<br>ABLE</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track15_4" name="track15" value="4">
+              <label for="track15_4">◢◣◢◣<br>4<br>QUITE<br>SMOOTH</label>
+            </div>
+            <div class="rating-option">
+              <input type="radio" id="track15_5" name="track15" value="5">
+              <label for="track15_5">◢◣◢◣◢<br>5<br>VERY<br>SMOOTH</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <button type="submit" class="submit-btn" id="submitBtn" disabled>
+        <span style="position: relative; z-index: 1;">◆ SUBMIT ANALYSIS ◆</span>
+      </button>
+    </form>
+
+    <div class="loading" id="loading">
+      ⟨ TRANSMITTING DATA ⟩<br>
+      <span style="font-size: 2em;">◈</span>
+    </div>
+  </div>
+<script>
+const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSee0Qv44ZQJHyJZo5GkmlmQYKI1PRzFsPciM7yYOqgXkaqScQ/formResponse";
+const PARTICIPANT_ENTRY = "entry.339641522";
+const RATINGS_ENTRY = "entry.1765397885";
+const TOTAL = 15;
+
+function updateProgress() {
+  let completed = 0;
+  const total = TOTAL;
+
+  for (let i = 1; i <= total; i++) {
+    const selected = document.querySelector('input[name="track' + i + '"]:checked');
+    const trackProgressFill = document.getElementById('trackProgress' + i);
+
+    if (selected) {
+      completed++;
+      document.getElementById('track' + i + 'Item').classList.add('completed');
+      if (trackProgressFill) {
+        trackProgressFill.style.width = '100%';
+      }
+    } else {
+      document.getElementById('track' + i + 'Item').classList.remove('completed');
+      if (trackProgressFill) {
+        trackProgressFill.style.width = '0%';
+      }
+    }
+  }
+
+  const progressBar = document.getElementById('progressBar');
+  const percentage = Math.round((completed / total) * 100);
+  progressBar.style.width = percentage + '%';
+  progressBar.textContent = completed + ' / ' + total;
+
+  const submitBtn = document.getElementById('submitBtn');
+  if (completed >= total) {
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = '1';
+  } else {
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.5';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  for (let i = 1; i <= TOTAL; i++) {
+    for (let j = 1; j <= 5; j++) {
+      const el = document.getElementById('track' + i + '_' + j);
+      if (el) {
+        el.addEventListener('change', updateProgress);
+        el.addEventListener('click', function() {
+          setTimeout(updateProgress, 100);
+        });
+      }
+    }
+  }
+  updateProgress();
+});
+
+document.getElementById('ratingForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  let allComplete = true;
+  let ratings = {};
+
+  for (let i = 1; i <= TOTAL; i++) {
+    const selected = document.querySelector('input[name="track' + i + '"]:checked');
+    if (selected) {
+      ratings['Sequence_' + String(i).padStart(2, '0')] = selected.value;
+    } else {
+      allComplete = false;
+    }
+  }
+
+  if (!allComplete) {
+    alert('⚠️ Please rate ALL transitions before submitting.\n\nScroll up to check for missing ratings.');
+    return false;
+  }
+
+  const participantName = document.getElementById('participantName').value || 'Anonymous';
+  const loadingEl = document.getElementById('loading');
+  const submitBtn = document.getElementById('submitBtn');
+
+  loadingEl.classList.add('active');
+  submitBtn.disabled = true;
+  submitBtn.textContent = '⟨ SUBMITTING... ⟩';
+
+  if (GOOGLE_FORM_URL && GOOGLE_FORM_URL !== "YOUR_FORM_URL_HERE") {
+    const formData = new FormData();
+    formData.append(PARTICIPANT_ENTRY, participantName);
+    formData.append(RATINGS_ENTRY, JSON.stringify(ratings));
+
+    fetch(GOOGLE_FORM_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: formData
+    }).then(() => {
+      showSuccess();
+    }).catch(() => {
+      showSuccess();
+    });
+  } else {
+    setTimeout(showSuccess, 1000);
+  }
+});
+
+function showSuccess() {
+  const loadingEl = document.getElementById('loading');
+  const submitBtn = document.getElementById('submitBtn');
+
+  loadingEl.classList.remove('active');
+  submitBtn.textContent = '✅ SUBMITTED!';
+  submitBtn.style.background = 'linear-gradient(135deg, #00ff88 0%, #00ffff 100%)';
+
+  alert('✅ ANALYSIS COMPLETE\n\n' +
+        '◆ DATA TRANSMITTED ◆\n' +
+        '◆ NEURAL PROCESSING INITIATED ◆\n\n' +
+        'Thank you for your contribution.');
+}
+</script>
+</body>
+</html>
